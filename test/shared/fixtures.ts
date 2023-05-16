@@ -1,21 +1,21 @@
 import { BigNumber } from 'ethers'
 import { ethers } from 'hardhat'
-import { MockTimeUniswapV3Pool } from '../../typechain/MockTimeUniswapV3Pool'
+import { MockTimeTartzPool } from '../../typechain/MockTimeTartzPool'
 import { TestERC20 } from '../../typechain/TestERC20'
-import { UniswapV3Factory } from '../../typechain/UniswapV3Factory'
-import { TestUniswapV3Callee } from '../../typechain/TestUniswapV3Callee'
-import { TestUniswapV3Router } from '../../typechain/TestUniswapV3Router'
-import { MockTimeUniswapV3PoolDeployer } from '../../typechain/MockTimeUniswapV3PoolDeployer'
+import { TartzFactory } from '../../typechain/TartzFactory'
+import { TestTartzCallee } from '../../typechain/TestTartzCallee'
+import { TestTartzRouter } from '../../typechain/TestTartzRouter'
+import { MockTimeTartzPoolDeployer } from '../../typechain/MockTimeTartzPoolDeployer'
 
 import { Fixture } from 'ethereum-waffle'
 
 interface FactoryFixture {
-  factory: UniswapV3Factory
+  factory: TartzFactory
 }
 
 async function factoryFixture(): Promise<FactoryFixture> {
-  const factoryFactory = await ethers.getContractFactory('UniswapV3Factory')
-  const factory = (await factoryFactory.deploy()) as UniswapV3Factory
+  const factoryFactory = await ethers.getContractFactory('TartzFactory')
+  const factory = (await factoryFactory.deploy()) as TartzFactory
   return { factory }
 }
 
@@ -41,14 +41,14 @@ async function tokensFixture(): Promise<TokensFixture> {
 type TokensAndFactoryFixture = FactoryFixture & TokensFixture
 
 interface PoolFixture extends TokensAndFactoryFixture {
-  swapTargetCallee: TestUniswapV3Callee
-  swapTargetRouter: TestUniswapV3Router
+  swapTargetCallee: TestTartzCallee
+  swapTargetRouter: TestTartzRouter
   createPool(
     fee: number,
     tickSpacing: number,
     firstToken?: TestERC20,
     secondToken?: TestERC20
-  ): Promise<MockTimeUniswapV3Pool>
+  ): Promise<MockTimeTartzPool>
 }
 
 // Monday, October 5, 2020 9:00:00 AM GMT-05:00
@@ -58,14 +58,14 @@ export const poolFixture: Fixture<PoolFixture> = async function (): Promise<Pool
   const { factory } = await factoryFixture()
   const { token0, token1, token2 } = await tokensFixture()
 
-  const MockTimeUniswapV3PoolDeployerFactory = await ethers.getContractFactory('MockTimeUniswapV3PoolDeployer')
-  const MockTimeUniswapV3PoolFactory = await ethers.getContractFactory('MockTimeUniswapV3Pool')
+  const MockTimeTartzPoolDeployerFactory = await ethers.getContractFactory('MockTimeTartzPoolDeployer')
+  const MockTimeTartzPoolFactory = await ethers.getContractFactory('MockTimeTartzPool')
 
-  const calleeContractFactory = await ethers.getContractFactory('TestUniswapV3Callee')
-  const routerContractFactory = await ethers.getContractFactory('TestUniswapV3Router')
+  const calleeContractFactory = await ethers.getContractFactory('TestTartzCallee')
+  const routerContractFactory = await ethers.getContractFactory('TestTartzRouter')
 
-  const swapTargetCallee = (await calleeContractFactory.deploy()) as TestUniswapV3Callee
-  const swapTargetRouter = (await routerContractFactory.deploy()) as TestUniswapV3Router
+  const swapTargetCallee = (await calleeContractFactory.deploy()) as TestTartzCallee
+  const swapTargetRouter = (await routerContractFactory.deploy()) as TestTartzRouter
 
   return {
     token0,
@@ -75,7 +75,7 @@ export const poolFixture: Fixture<PoolFixture> = async function (): Promise<Pool
     swapTargetCallee,
     swapTargetRouter,
     createPool: async (fee, tickSpacing, firstToken = token0, secondToken = token1) => {
-      const mockTimePoolDeployer = (await MockTimeUniswapV3PoolDeployerFactory.deploy()) as MockTimeUniswapV3PoolDeployer
+      const mockTimePoolDeployer = (await MockTimeTartzPoolDeployerFactory.deploy()) as MockTimeTartzPoolDeployer
       const tx = await mockTimePoolDeployer.deploy(
         factory.address,
         firstToken.address,
@@ -86,7 +86,7 @@ export const poolFixture: Fixture<PoolFixture> = async function (): Promise<Pool
 
       const receipt = await tx.wait()
       const poolAddress = receipt.events?.[0].args?.pool as string
-      return MockTimeUniswapV3PoolFactory.attach(poolAddress) as MockTimeUniswapV3Pool
+      return MockTimeTartzPoolFactory.attach(poolAddress) as MockTimeTartzPool
     },
   }
 }

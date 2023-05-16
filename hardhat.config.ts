@@ -44,11 +44,24 @@ export default {
     bnb: {
       url: `https://bsc-dataseed.binance.org/`,
     },
+    alfajores: {
+      url: `https://alfajores-forno.celo-testnet.org`,
+    },
   },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
     apiKey: process.env.ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        network: "alfajores",
+        chainId: 44787,
+        urls: {
+          apiURL: "https://api-alfajores.celoscan.io/api",
+          browserURL: "https://alfajores.celoscan.io"
+        }
+      }
+    ],
   },
   solidity: {
     version: '0.7.6',

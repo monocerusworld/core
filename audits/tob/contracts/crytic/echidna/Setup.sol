@@ -2,8 +2,8 @@ pragma solidity =0.7.6;
 pragma abicoder v2;
 
 import '../../../../../contracts/test/TestERC20.sol';
-import '../../../../../contracts/UniswapV3Pool.sol';
-import '../../../../../contracts/UniswapV3Factory.sol';
+import '../../../../../contracts/TartzPool.sol';
+import '../../../../../contracts/TartzFactory.sol';
 
 contract SetupToken {
     TestERC20 public token;
@@ -31,7 +31,7 @@ contract SetupTokens {
         tokenSetup1 = new SetupToken();
 
         // switch them around so that token0's address is lower than token1's
-        // since this is what the uniswap factory will do when you create the pool
+        // since this is what the tartz factory will do when you create the pool
         if (address(tokenSetup0.token()) > address(tokenSetup1.token())) {
             (tokenSetup0, tokenSetup1) = (tokenSetup1, tokenSetup0);
         }
@@ -53,8 +53,8 @@ contract SetupTokens {
     }
 }
 
-contract SetupUniswap {
-    UniswapV3Pool public pool;
+contract SetupTartz {
+    TartzPool public pool;
     TestERC20 token0;
     TestERC20 token1;
 
@@ -62,22 +62,22 @@ contract SetupUniswap {
     // fee 500   + tickSpacing 10
     // fee 3000  + tickSpacing 60
     // fee 10000 + tickSpacing 200
-    UniswapV3Factory factory;
+    TartzFactory factory;
 
     constructor(TestERC20 _token0, TestERC20 _token1) public {
-        factory = new UniswapV3Factory();
+        factory = new TartzFactory();
         token0 = _token0;
         token1 = _token1;
     }
 
     function createPool(uint24 _fee, uint160 _startPrice) public {
-        pool = UniswapV3Pool(factory.createPool(address(token0), address(token1), _fee));
+        pool = TartzPool(factory.createPool(address(token0), address(token1), _fee));
         pool.initialize(_startPrice);
     }
 }
 
-contract UniswapMinter {
-    UniswapV3Pool pool;
+contract TartzMinter {
+    TartzPool pool;
     TestERC20 token0;
     TestERC20 token1;
 
@@ -94,11 +94,11 @@ contract UniswapMinter {
         token1 = _token1;
     }
 
-    function setPool(UniswapV3Pool _pool) public {
+    function setPool(TartzPool _pool) public {
         pool = _pool;
     }
 
-    function uniswapV3MintCallback(
+    function tartzV3MintCallback(
         uint256 amount0Owed,
         uint256 amount1Owed,
         bytes calldata data
@@ -148,8 +148,8 @@ contract UniswapMinter {
     }
 }
 
-contract UniswapSwapper {
-    UniswapV3Pool pool;
+contract TartzSwapper {
+    TartzPool pool;
     TestERC20 token0;
     TestERC20 token1;
 
@@ -167,11 +167,11 @@ contract UniswapSwapper {
         token1 = _token1;
     }
 
-    function setPool(UniswapV3Pool _pool) public {
+    function setPool(TartzPool _pool) public {
         pool = _pool;
     }
 
-    function uniswapV3SwapCallback(
+    function tartzV3SwapCallback(
         int256 amount0Delta,
         int256 amount1Delta,
         bytes calldata data
